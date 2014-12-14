@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+	    <title>EhrScape - Vnos in poizvedovanje po EHR podatkih</title>
+	    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+	    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" rel="stylesheet">
+	    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+	    <script src="demo.js"></script>
+		<script type="text/javascript" src="d3.js"></script>
+		<link rel="icon" href="fav.ico">
+	    <style>
+			body {background-color: #ffffff;
+					background: -webkit-linear-gradient(90deg, red, #ff8888, red); /* For Safari 5.1 to 6.0 */
+					background: -o-linear-gradient(90deg, red, #ff8888, red); /* For Opera 11.1 to 12.0 */
+					background: -moz-linear-gradient(90deg, red, #ff8888, red); /* For Firefox 3.6 to 15 */
+					background: linear-gradient(90deg, #ff8888, #ffffff, #ff8888); /* Standard syntax (must be last) */}
+	  		.btn {margin-top: 10px;}
+	  		.obvestilo {margin-left:10px;}
+			#head {
+					padding:10px;
+					border: 1px solid #000000;
+					background: -webkit-linear-gradient(0deg, red, #ff8888, red); /* For Safari 5.1 to 6.0 */
+					background: -o-linear-gradient(0deg, red, #ff8888, red); /* For Opera 11.1 to 12.0 */
+					background: -moz-linear-gradient(0deg, red, #ff8888, red); /* For Firefox 3.6 to 15 */
+					background: linear-gradient(0deg, red, #ff8888, red); /* Standard syntax (must be last) */}
+			#head h2 {color: #ffffff;}
+			#head small {color: #dddddd;}
+			.page-header{margin: 0px;
+						border-bottom: 0px;}
+			#bar {padding: 0px}
+			#tek {padding: 10px}
+			#s {border-style: solid;
+				border-width: 1px;
+				color: #ffffff;
+				background-color: #337ab7;
+				border-color: #2e6ada4;
+				border-radius: 5px;
+				height: 50px;
+				text-align: center;
+				display: table;
+				width: 100%;}
+			#s span {display: table-cell;
+				vertical-align: middle;}
+			#s :hover{background-color: #115895;
+				border-radius: 5px;
+				cursor: pointer;}
+			#a1 {display: none;}
+			#a2 {display: none;}
+			#a3 {display: none;}
+			#a4 {display: none;}
+			#kon {padding: 0px;}
+			#f{padding: 0px;}
+			.axis path,
+			.axis line {
+				fill: none;
+				stroke: #000;
+				shape-rendering: crispEdges;
+			}
+
+			.x.axis path {
+				display: none;
+			}
+
+			.line {
+				fill: none;
+				stroke: steelblue;
+				stroke-width: 1.5px;
+			}
+			#grap {display: none;}
+			#povprecje { background-color: #ff8800;
+						color: #ffffff;
+						border-radius: 5px;
+						border-style: solid;
+						padding-left: 10px;}
+	  	</style>
+	</head>
+	<body>
+		<div id="head">
+			<div class="page-header"><h2>Vnos in poizvedovanje po EHR podatkih <small>EhrScape platforma</small></h2></div>
+		</div>
+		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="bar">
+			<nav class="navbar navbar-default">
+				<div class="container-fluid" id="kon">
+					<div class="col-lg-2 col-md-2 col-sm-3 col-xs-3" id="f">
+						<div id="s" onclick="spremeni('a1',this)"><span>Dodaj bolnika</span></div>
+					</div>
+					<div class="col-lg-2 col-md-2 col-sm-3 col-xs-3" id="f">
+						<div id="s" onclick="spremeni('a2',this)"><span>Preberi bolnika</span></div>
+					</div>
+					<div class="col-lg-2 col-md-2 col-sm-3 col-xs-3" id="f">
+						<div id="s" onclick="spremeni('a3',this)"><span>Dodaj meritve</span></div>
+					</div>
+					<div class="col-lg-2 col-md-2 col-sm-3 col-xs-3" id="f">
+						<div id="s" onclick="spremeni('a4',this)"><span>Preberi meritve</span></div>
+					</div>
+				</div>
+			</nav>
+		</div>
+		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="tek">
+			<div class="row" id="a1">
+				<div class="col-lg-6 col-md-8 col-sm-10 col-xs-12">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<div class="row">
+								<div class="col-lg-8 col-md-8 col-sm-8"><b>Kreiraj EHR zapis</b> za novega bolnika</div>
+								<div class="col-lg-4 col-md-4 col-sm-4"><select class="form-control input-sm" id="preberiPredlogoBolnika"><option value=""></option></select></div>
+							</div>
+						</div>
+						<div class="panel-body">
+							<span class="label label-default">Ime</span><input id="kreirajIme" type="text" class="form-control input-mini" placeholder="Osama">
+							<span class="label label-default">Priimek</span><input id="kreirajPriimek" type="text" class="form-control" placeholder="Bin Laden">
+							<span class="label label-default">Datum rojstva</span><input id="kreirajDatumRojstva" type="text" class="form-control" placeholder="1957-03-10T09:08">
+							<button type="button" class="btn btn-primary btn-xs" onclick="kreirajEHRzaBolnika()">Dodaj osnovne podatke o bolniku</button><span id="kreirajSporocilo"></span>
+							<div><button type="button" class="btn btn-primary btn-xs" onclick="generiraj()">Generiraj</button></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row" id="a2">
+				<div class="col-lg-6 col-md-8 col-sm-10 col-xs-12">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<div class="row">
+								<div class="col-lg-8 col-md-8 col-sm-8"><b>Preberi EHR zapis</b> obstoječega bolnika</div>
+								<div class="col-lg-4 col-md-4 col-sm-4"><select class="form-control input-sm" id="preberiObstojeciEHR"><option value=""></option></select></div>
+							</div>
+						</div>
+						<div class="panel-body">
+							<span class="label label-default">EHR ID</span><input id="preberiEHRid" type="text" class="form-control input-mini" placeholder="7b661e12-3a98-21ad-c29e-2dc9f5a3d885">
+							<button type="button" class="btn btn-primary btn-xs" onclick="preberiEHRodBolnika()">Preberi osnovne podatke o bolniku</button><span id="preberiSporocilo"></span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row" id="a3">
+				<div class="col-lg-6 col-md-8 col-sm-10 col-xs-12">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<div class="row">
+								<div class="col-lg-8 col-md-8 col-sm-8"><b>Vnos</b> meritve <b>vitalnih znakov</b> bolnika</div>
+								<div class="col-lg-4 col-md-4 col-sm-4"><select class="form-control input-sm" id="preberiObstojeciVitalniZnak"><option value=""></option></select></div>
+							</div>
+						</div>				
+						<div class="panel-body">
+							<span class="label label-default">EHR ID</span><input id="dodajVitalnoEHR" type="text" class="form-control input-mini" placeholder="7b661e12-3a98-21ad-c29e-2dc9f5a3d885">
+							<span class="label label-default">Datum in ura</span><input id="dodajVitalnoDatumInUra" type="text" class="form-control input-mini" placeholder="2014-11-21T11:40Z">
+							<span class="label label-default">Telesna višina</span><div class="input-group"><input id="dodajVitalnoTelesnaVisina" type="text" class="form-control input-mini" placeholder="185"><span class="input-group-addon">cm</span></div>
+							<span class="label label-default">Telesna teža</span><div class="input-group"><input id="dodajVitalnoTelesnaTeza" type="text" class="form-control input-mini" placeholder="80.00"><span class="input-group-addon">kg</span></div>
+							<span class="label label-default">Telesna temperatura</span><div class="input-group"><input id="dodajVitalnoTelesnaTemperatura" type="text" class="form-control input-mini" placeholder="36.50"><span class="input-group-addon">°C</span></div>
+							<span class="label label-default">Sistolični krvni tlak</span><div class="input-group"><input id="dodajVitalnoKrvniTlakSistolicni" type="text" class="form-control input-mini" placeholder="118"><span class="input-group-addon">mm Hg</span></div>
+							<span class="label label-default">Diastolični krvni tlak</span><div class="input-group"><input id="dodajVitalnoKrvniTlakDiastolicni" type="text" class="form-control input-mini" placeholder="92"><span class="input-group-addon">mm Hg</span></div>
+							<span class="label label-default">Nasičenost krvi s kisikom</span><div class="input-group"><input id="dodajVitalnoNasicenostKrviSKisikom" type="text" class="form-control input-mini" placeholder="98"><span class="input-group-addon">%</span></div>
+							<span class="label label-default">Merilec</span><input id="dodajVitalnoMerilec" type="text" class="form-control input-mini" placeholder="medicinska sestra Hrastova Micka">
+							<button type="button" class="btn btn-primary btn-xs" onclick="dodajMeritveVitalnihZnakov()">Dodaj meritve vitalnih znakov</button><span id="dodajMeritveVitalnihZnakovSporocilo"></span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row" id="a4">
+				<div class="col-lg-6 col-md-8 col-sm-10 col-xs-12">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<div class="row">
+								<div class="col-lg-6 col-md-6 col-sm-6"><b>Pregled</b> meritev <b>vitalnih znakov</b> bolnika</div>
+								<div class="col-lg-3 col-md-3 col-sm-3"><select class="form-control input-sm" id="preberiTipZaVitalneZnake"><option value="telesna temperatura">telesna temperatura</option><option value="telesna teža">telesna teža</option><option value="krvni tlak AQL">krvni pritisk</option></select></div>
+								<div class="col-lg-3 col-md-3 col-sm-3"><select class="form-control input-sm" id="preberiEhrIdZaVitalneZnake"><option value=""></option></select></div>
+							</div>
+						</div>				
+						<div class="panel-body">
+							<span class="label label-default">EHR ID</span><input id="meritveVitalnihZnakovEHRid" type="text" class="form-control input-mini" placeholder="7b661e12-3a98-21ad-c29e-2dc9f5a3d885">
+							<button type="button" class="btn btn-primary btn-xs" onclick="preberiMeritveVitalnihZnakov('telesna temperatura')">Preberi meritve vitalnih znakov</button><span id="preberiMeritveVitalnihZnakovSporocilo"></span>
+							<div id="rezultatMeritveVitalnihZnakov"></div>
+							<div id="povprecje"></div>
+						</div>
+					</div>			
+				</div>
+				<div class="col-lg-6 col-md-8 col-sm-10 col-xs-12" id="grap" onresize="generirajGraf2()">
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<div class="row">
+								<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">Graf krvnega tlaka bolnika</div>
+							</div>
+						</div>
+						<grap class="panel-body" id="gra">
+							
+						</grap>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
